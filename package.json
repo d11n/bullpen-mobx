@@ -23,8 +23,10 @@
         "url": "https://github.com/rhombal/bullpen-mobx/issues"
     },
     "dependencies": {
-        "bullpen": "0.0.7",
-        "mobx": "^4.0.2"
+        "bullpen": "0.0.8"
+    },
+    "peerDependencies": {
+        "mobx": "3.x - 4.x"
     },
     "devDependencies": {
         "babel-cli": "^6.26.0",
