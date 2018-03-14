@@ -1,0 +1,56 @@
+{
+    "name": "bullpen-mobx",
+    "version": "0.0.0",
+    "description": "mobx implementation of bullpen",
+    "author": "Derek Dunagan (https://github.com/rhombal)",
+    "license": "MIT",
+    "keywords": [
+        "store",
+        "state",
+        "state management",
+        "data",
+        "data store",
+        "data flow",
+        "mobx"
+    ],
+    "main": "target/npm/index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/rhombal/bullpen-mobx.git"
+    },
+    "homepage": "https://github.com/rhombal/bullpen-mobx#readme",
+    "bugs": {
+        "url": "https://github.com/rhombal/bullpen-mobx/issues"
+    },
+    "dependencies": {
+        "bullpen": "0.0.7",
+        "mobx": "^4.0.2"
+    },
+    "devDependencies": {
+        "babel-cli": "^6.26.0",
+        "babel-preset-env": "^1.6.1",
+        "babel-preset-react": "^6.24.1",
+        "babel-preset-stage-3": "^6.24.1",
+        "chokidar-cli": "^1.2.0",
+        "docco": "^0.8.0",
+        "eslint": "^4.18.2",
+        "mkdirp": "^0.5.1",
+        "mocha": "^5.0.4",
+        "np": "^2.20.1",
+        "rimraf": "^2.6.2"
+    },
+    "scripts": {
+        "test": "eslint ./source && mocha ./source/**/*.test.js",
+        "prestart": "rimraf ./target/npm; mkdirp ./target/npm; npm run --silent build",
+        "start": "chokidar './source/**/*.js' --command 'npm test --silent && source={path} && target=${source/source\\//target/npm/} && babel $source --out-file $target'",
+        "prebuild-npm": "npm install --silent && npm test --silent",
+        "prebuild-docs": "npm test --silent",
+        "build": "npm run --silent build-npm",
+        "build-npm": "rimraf ./target/npm; babel ./source --out-dir ./target/npm",
+        "build-docs": "rimraf ./target/docs; mkdirp ./target/docs ./.tmp/docco; echo '{\".js\":{\"name\":\"javascript\",\"symbol\":\"///\"}}' > ./.tmp/docco/languages.json; cd source; docco index.js bullpen.js collection.js datasource.js query.js util.js view.js --languages ../.tmp/docco/languages.json --output ../target/docs; cd ..; echo '*{text-transform:none!important}.annotation h1,.annotation h2,.annotation h3,.annotation h4,.annotation h5,.annotation h6{margin-top:8px!important}' >> ./target/docs/docco.css",
+        "postbuild-docs": "rimraf ./.tmp/docco",
+        "publish-npm": "git push origin && np",
+        "rinse": "rimraf ./target ./.tmp ./tmp ./**/.tmp ./**/tmp ./npm-debug.log* ./**/npm-debug.log*",
+        "scrub": "npm run --silent rinse; rimraf ./node_modules"
+    }
+}
