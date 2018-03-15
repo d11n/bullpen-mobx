@@ -51,7 +51,7 @@
         "build-npm": "rimraf ./target/npm; babel ./source --out-dir ./target/npm",
         "build-docs": "rimraf ./target/docs; mkdirp ./target/docs ./.tmp/docco; echo '{\".js\":{\"name\":\"javascript\",\"symbol\":\"///\"}}' > ./.tmp/docco/languages.json; cd source; docco index.js bullpen.js collection.js datasource.js query.js util.js view.js --languages ../.tmp/docco/languages.json --output ../target/docs; cd ..; echo '*{text-transform:none!important}.annotation h1,.annotation h2,.annotation h3,.annotation h4,.annotation h5,.annotation h6{margin-top:8px!important}' >> ./target/docs/docco.css",
         "postbuild-docs": "rimraf ./.tmp/docco",
-        "publish-npm": "git push origin && np",
+        "publish-npm": "npm run --silent build && git push origin && np",
         "rinse": "rimraf ./target ./.tmp ./tmp ./**/.tmp ./**/tmp ./npm-debug.log* ./**/npm-debug.log*",
         "scrub": "npm run --silent rinse; rimraf ./node_modules"
     }
