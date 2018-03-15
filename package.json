@@ -2,7 +2,7 @@
     "name": "bullpen-mobx",
     "version": "0.0.1",
     "description": "mobx implementation of bullpen",
-    "author": "Derek Dunagan (https://github.com/rhombal)",
+    "author": "Derek Dunagan (https://github.com/d11n)",
     "license": "MIT",
     "keywords": [
         "store",
@@ -16,11 +16,11 @@
     "main": "target/npm/index.js",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rhombal/bullpen-mobx.git"
+        "url": "git+https://github.com/d11n/bullpen-mobx.git"
     },
-    "homepage": "https://github.com/rhombal/bullpen-mobx#readme",
+    "homepage": "https://github.com/d11n/bullpen-mobx#readme",
     "bugs": {
-        "url": "https://github.com/rhombal/bullpen-mobx/issues"
+        "url": "https://github.com/d11n/bullpen-mobx/issues"
     },
     "dependencies": {
         "bullpen": "0.0.8"
