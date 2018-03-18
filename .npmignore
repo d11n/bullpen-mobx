@@ -1,9 +1,11 @@
-.tmp
-.vscode
-node_modules
 source
 target/docs
 .babelrc
 .eslintignore
 .eslintrc.yml
 .nvmrc
+.nyc_output
+.tmp
+.travis.yml
+.vscode
+TODO.txt

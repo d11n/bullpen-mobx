@@ -1,4 +1,5 @@
-.tmp
-.vscode
 node_modules
 target
+.nyc_output
+.tmp
+.vscode
