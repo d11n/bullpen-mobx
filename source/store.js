@@ -62,11 +62,17 @@
             const key = arg.query_id;
             const query_string = String(arg.query_string);
             const value = store_struct.query_result_dict[key];
-            datasource_payload
-                ? update_query(arg, datasource_payload)
-                : (undefined === value || query_string !== value.query_string)
-                    && update_query(arg, new Query_result)
-                ; // eslint-disable-line indent
+            if (datasource_payload) {
+                update_query(arg, datasource_payload);
+            } else if (undefined === value
+                || query_string !== value.query_string
+                ) { // eslint-disable-line indent
+                const query_result_future = new Query_result({
+                    query_string: arg.query_string,
+                    }); // eslint-disable-line indent
+                query_result_future.is_pending = true;
+                update_query(arg, query_result_future);
+            }
             return store_struct.query_result_dict[key].result;
         }
 
@@ -93,7 +99,7 @@
             } else {
                 item = store_struct.item_list.find(find_item);
                 if (undefined === item) {
-                    update_item({ id: arg });
+                    update_item({ id: arg, is_pending: true });
                 }
             }
             return item || store_struct.item_list.find(find_item);

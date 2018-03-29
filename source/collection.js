@@ -32,10 +32,8 @@
 
         function is_full_store_result(result) {
             return MOBX.isObservableArray(result)
-                ? result.length > 0
-                : MOBX.isObservableArray(result.items)
-                    ? result.items.length > 0
-                    : Object.keys(result).length > 1 // more than just "id"
+                ? result.length > 0 // full item list
+                : !result.is_pending // pending query or item
                 ; // eslint-disable-line indent
         }
 
