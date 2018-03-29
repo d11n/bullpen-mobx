@@ -22,9 +22,10 @@
                 enumerable: true,
                 }, // eslint-disable-line indent
             item_list: { value: [], enumerable: true },
-            full_item_list: { get: compute_full_item_list, enumerable: true },
+            full_item_list: { value: [], enumerable: true },
             query_result_dict: { value: {}, enumerable: true },
             })); // eslint-disable-line indent
+        MOBX.autorun(sync_full_item_list);
         Object.defineProperties(this_store, {
             is_hydrated: {
                 get: () => store_struct.is_item_list_hydrated,
@@ -39,15 +40,11 @@
 
         // -----------
 
-        function compute_full_item_list() {
-            const this_store_struct = this;
-            // Until the collection is hydrated, it contains a random subset
-            // of items that have been fetched individually.
-            // So return an empty array until hydrated.
-            return this_store_struct.is_item_dict_hydrated
-                ? this_store_struct.item_list
-                : MOBX.observable([])
+        function sync_full_item_list() {
+            return store_struct.is_item_list_hydrated
+                && store_struct.full_item_list.replace(store_struct.item_list)
                 ; // eslint-disable-line indent
+            // ^ so wasteful, find a leaner way to achieve the same result
         }
     }
 
@@ -74,7 +71,6 @@
         }
 
         function fetch_all() {
-            debugger;
             if (datasource_payload) {
                 !Array.isArray(datasource_payload)
                     && throw_error(
@@ -84,7 +80,6 @@
                 store_struct.item_list.replace(datasource_payload);
                 store_struct.is_item_list_hydrated = true;
             }
-            debugger;
             return store_struct.full_item_list;
         }
 

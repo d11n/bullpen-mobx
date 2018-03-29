@@ -62,7 +62,6 @@
         }
 
         function process_datasource_result(raw_result) {
-            debugger;
             store_result = op.execute_on_store(raw_result);
             const result = NOOP === store_result
                 ? raw_result
@@ -75,7 +74,9 @@
             /* eslint-disable indent */
             return 'mutate' === verb ? undefined
                 : 'get' === verb ? MOBX.isObservableArray(getter_result)
-                    ? getter_result.replace(result || [])
+                    ? result && result.length > 0
+                        ? getter_result.replace(result)
+                        : getter_result
                     : MOBX.extendObservable(getter_result, MOBX.toJS(result))
                 : result
                 ;
