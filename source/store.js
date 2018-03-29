@@ -16,22 +16,22 @@
 
     function initialize_store_struct(this_store) {
         const store_struct = MOBX.observable(Object.defineProperties({}, {
-            is_item_map_hydrated: {
+            is_item_list_hydrated: {
                 value: false,
                 writable: true,
                 enumerable: true,
                 }, // eslint-disable-line indent
-            item_map: { value: new Map, enumerable: true },
-            item_list: { value: MOBX.computed(compute_item_list) },
-            query_result_map: { value: new Map, enumerable: true },
+            item_list: { value: [], enumerable: true },
+            full_item_list: { get: compute_full_item_list, enumerable: true },
+            query_result_dict: { value: {}, enumerable: true },
             })); // eslint-disable-line indent
         Object.defineProperties(this_store, {
             is_hydrated: {
-                get: () => store_struct.is_item_map_hydrated,
+                get: () => store_struct.is_item_list_hydrated,
                 enumerable: true,
                 }, // eslint-disable-line indent
             has: {
-                value: (id) => Boolean(store_struct.item_map.get(id)),
+                value: (id) => Boolean(store_struct.item_dict[id]),
                 enumerable: true,
                 }, // eslint-disable-line indent
             }); // eslint-disable-line indent
@@ -39,14 +39,14 @@
 
         // -----------
 
-        function compute_item_list() {
-            console.log('compute_item_list', this);
+        function compute_full_item_list() {
+            const this_store_struct = this;
             // Until the collection is hydrated, it contains a random subset
             // of items that have been fetched individually.
             // So return an empty array until hydrated.
-            return store_struct.is_item_map_hydrated
-                ? Array.from(this.item_map.values())
-                : []
+            return this_store_struct.is_item_dict_hydrated
+                ? this_store_struct.item_list
+                : MOBX.observable([])
                 ; // eslint-disable-line indent
         }
     }
@@ -62,21 +62,15 @@
         // -----------
 
         function fetch_query() {
-            debugger;
             const key = arg.query_id;
-            const query = String(arg.query_string);
-            let value;
-            if (datasource_payload) {
-                const result = JSON.parse(JSON.stringify(datasource_payload));
-                store_struct.query_result_map.set(key, { query, result });
-            }
-            value = store_struct.query_result_map.get(key);
-            if (undefined === value) {
-                const result = JSON.parse(JSON.stringify(new Query_result));
-                store_struct.query_result_map.set(key, { query, result });
-                value = store_struct.query_result_map.get(key);
-            }
-            return value.result;
+            const query_string = String(arg.query_string);
+            const value = store_struct.query_result_dict[key];
+            datasource_payload
+                ? update_query(arg, datasource_payload)
+                : (undefined === value || query_string !== value.query_string)
+                    && update_query(arg, new Query_result)
+                ; // eslint-disable-line indent
+            return store_struct.query_result_dict[key].result;
         }
 
         function fetch_all() {
@@ -87,30 +81,66 @@
                         'datasource attempted to hydrate store with non-array',
                         ) // eslint-disable-line indent
                     ; // eslint-disable-line indent
-                store_struct.item_map.clear();
-                for (const item of datasource_payload) {
-                    store_struct.item_map.set(item.id, item);
-                }
-                store_struct.is_item_map_hydrated = true;
+                store_struct.item_list.replace(datasource_payload);
+                store_struct.is_item_list_hydrated = true;
             }
-            return store_struct.item_list;
+            debugger;
+            return store_struct.full_item_list;
         }
 
         function fetch_one() {
-            debugger;
-            let item = datasource_payload;
-            if (item) {
-                if (arg !== item.id) {
+            let item;
+            if (datasource_payload) {
+                if (arg !== datasource_payload.id) {
                     throw_error('id does not match id fetched from datasource');
                 }
-                store_struct.item_map.set(item.id, item);
+                update_item(datasource_payload);
             } else {
-                item = store_struct.item_map.get(arg);
+                item = store_struct.item_list.find(find_item);
                 if (undefined === item) {
-                    item = store_struct.item_map.set(arg, {});
+                    update_item({ id: arg });
                 }
             }
-            return item;
+            return item || store_struct.item_list.find(find_item);
+        }
+
+        function update_query(query, raw_result) {
+            const key = arg.query_id;
+            const query_string = String(arg.query_string);
+            const result = JSON.parse(JSON.stringify(raw_result));
+            // eslint-disable-next-line no-prototype-builtins
+            if (store_struct.query_result_dict.hasOwnProperty(key)) {
+                store_struct.query_result_dict[key].query_string = query_string;
+                const old_result = store_struct.query_result_dict[key].result;
+                reset_observable_object(old_result); // semi-leaky :(
+                return MOBX.extendObservable(old_result, result);
+            }
+            return MOBX.extendObservable(
+                store_struct.query_result_dict,
+                { [key]: { query_string, result } },
+                ); // eslint-disable-line indent
+        }
+
+        function update_item(new_item) {
+            for (const item of store_struct.item_list) {
+                if (arg === item.id) {
+                    reset_observable_object(item); // semi-leaky :(
+                    return MOBX.extendObservable(item, new_item);
+                }
+            }
+            return store_struct.item_list.push(new_item);
+        }
+
+        function find_item(item) {
+            return arg === item.id;
+        }
+
+        function reset_observable_object(obj) {
+            const keys = Object.keys(obj);
+            for (const key of keys) {
+                obj[key] = undefined;
+            }
+            return obj;
         }
     }
 

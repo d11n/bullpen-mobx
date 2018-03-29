@@ -17,10 +17,10 @@
     // -----------
 
     function perform_operation(op) {
-        const verb = op.bullpen_verb;
+        const verb = op.verb;
         let getter_result;
         let store_result = get_current_store_result();
-        if (store_result) {
+        if (store_result && is_full_store_result(store_result)) {
             return prepare_result(store_result);
         }
         return NOOP === get_datasource_promise()
@@ -30,34 +30,34 @@
 
         // -----------
 
+        function is_full_store_result(result) {
+            return MOBX.isObservableArray(result)
+                ? result.length > 0
+                : MOBX.isObservableArray(result.items)
+                    ? result.items.length > 0
+                    : Object.keys(result).length > 1 // more than just "id"
+                ; // eslint-disable-line indent
+        }
+
         function get_current_store_result() {
             if ('get' === verb) {
                 const initial_value = op.is_for_all_items ? [] : {};
                 getter_result = MOBX.observable(initial_value);
             }
-            if ([ 'get', 'stream' ].includes(verb)) {
-                const result = op.execute_on_store();
-                if (NOOP !== result && undefined !== result.id) {
-                    return result;
-                }
-            }
-            return null;
+            return [ 'get', 'stream' ].includes(verb)
+                ? op.execute_on_store()
+                : null
+                ; // eslint-disable-line indent
         }
 
         function get_datasource_promise() {
             const datasource_promise = op.execute_on_datasource(op.params);
-            if (NOOP === datasource_promise) {
-                NOOP === store_result && throw_noop_error(verb, op.name);
-                [ 'get', 'stream' ].includes(verb)
-                    && undefined !== store_result.id
-                    && throw_noop_error(verb, op.name)
-                    ; // eslint-disable-line indent
-            } else {
-                datasource_promise instanceof Promise
+            NOOP === datasource_promise && NOOP === store_result
+                ? throw_noop_error(verb, op.name)
+                : datasource_promise instanceof Promise
                     ? datasource_promise.then(process_datasource_result)
                     : throw_datasource_return_error(op.datasource_verb)
-                    ; // eslint-disable-line indent
-            }
+                ; // eslint-disable-line indent
             return datasource_promise;
         }
 
@@ -72,12 +72,11 @@
         }
 
         function prepare_result(result) {
-            debugger;
             /* eslint-disable indent */
             return 'mutate' === verb ? undefined
                 : 'get' === verb ? MOBX.isObservableArray(getter_result)
                     ? getter_result.replace(result || [])
-                    : MOBX.extendObservable(getter_result, result)
+                    : MOBX.extendObservable(getter_result, MOBX.toJS(result))
                 : result
                 ;
             /* eslint-enable indent */
