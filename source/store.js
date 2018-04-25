@@ -48,7 +48,7 @@
         }
     }
 
-    function perform_default_fetch(store_struct, arg, datasource_payload) {
+    function perform_default_fetch(store_struct, arg, endpoint_payload) {
         /* eslint-disable indent */
         return arg instanceof Query ? fetch_query()
             : ALL_ITEMS === arg ? fetch_all()
@@ -62,8 +62,8 @@
             const key = arg.query_id;
             const query_string = String(arg.query_string);
             const value = store_struct.query_result_dict[key];
-            if (datasource_payload) {
-                update_query(arg, datasource_payload);
+            if (endpoint_payload) {
+                update_query(arg, endpoint_payload);
             } else if (undefined === value
                 || query_string !== value.query_string
                 ) { // eslint-disable-line indent
@@ -77,13 +77,13 @@
         }
 
         function fetch_all() {
-            if (datasource_payload) {
-                !Array.isArray(datasource_payload)
+            if (endpoint_payload) {
+                !Array.isArray(endpoint_payload)
                     && throw_error(
-                        'datasource attempted to hydrate store with non-array',
+                        'endpoint attempted to hydrate store with non-array',
                         ) // eslint-disable-line indent
                     ; // eslint-disable-line indent
-                store_struct.item_list.replace(datasource_payload);
+                store_struct.item_list.replace(endpoint_payload);
                 store_struct.is_item_list_hydrated = true;
             }
             return store_struct.full_item_list;
@@ -91,11 +91,11 @@
 
         function fetch_one() {
             let item;
-            if (datasource_payload) {
-                if (arg !== datasource_payload.id) {
-                    throw_error('id does not match id fetched from datasource');
+            if (endpoint_payload) {
+                if (arg !== endpoint_payload.id) {
+                    throw_error('id does not match id fetched from endpoint');
                 }
-                update_item(datasource_payload);
+                update_item(endpoint_payload);
             } else {
                 item = store_struct.item_list.find(find_item);
                 if (undefined === item) {
@@ -103,6 +103,10 @@
                 }
             }
             return item || store_struct.item_list.find(find_item);
+        }
+
+        function find_item(item) {
+            return arg === item.id;
         }
 
         function update_query(query, raw_result) {
@@ -113,8 +117,7 @@
             if (store_struct.query_result_dict.hasOwnProperty(key)) {
                 store_struct.query_result_dict[key].query_string = query_string;
                 const old_result = store_struct.query_result_dict[key].result;
-                reset_observable_object(old_result); // semi-leaky :(
-                return MOBX.extendObservable(old_result, result);
+                return replaceObservable(old_result, result);
             }
             return MOBX.extendObservable(
                 store_struct.query_result_dict,
@@ -125,27 +128,31 @@
         function update_item(new_item) {
             for (const item of store_struct.item_list) {
                 if (arg === item.id) {
-                    reset_observable_object(item); // semi-leaky :(
-                    return MOBX.extendObservable(item, new_item);
+                    return replaceObservable(item, new_item);
                 }
             }
             return store_struct.item_list.push(new_item);
         }
-
-        function find_item(item) {
-            return arg === item.id;
-        }
-
-        function reset_observable_object(obj) {
-            const keys = Object.keys(obj);
-            for (const key of keys) {
-                obj[key] = undefined;
-            }
-            return obj;
-        }
     }
 
     // -----------
+
+    function replaceObservable(target, raw_props) {
+        const emptied_target = {};
+        const keys = Object.keys(target);
+        for (const key of keys) {
+            emptied_target[key] = undefined;
+        }
+        const props = 'object' === typeof raw_props
+            ? raw_props
+            : {
+                id: target.id,
+                query_string: target.query_string,
+                is_null: true,
+                } // eslint-disable-line indent
+            ; // eslint-disable-line indent
+        return MOBX.extendObservable(target, { ...emptied_target, ...props });
+    }
 
     function throw_error(message) {
         throw new Error(`BULLPEN.Collection: ${ message }`);

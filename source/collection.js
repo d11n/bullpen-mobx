@@ -23,7 +23,7 @@
         if (store_result && is_full_store_result(store_result)) {
             return prepare_result(store_result);
         }
-        return NOOP === get_datasource_promise()
+        return NOOP === get_endpoint_promise()
             ? prepare_result(op.execute_on_store(op.params))
             : prepare_result(store_result)
             ; // eslint-disable-line indent
@@ -48,23 +48,20 @@
                 ; // eslint-disable-line indent
         }
 
-        function get_datasource_promise() {
-            const datasource_promise = op.execute_on_datasource(op.params);
-            NOOP === datasource_promise && NOOP === store_result
+        function get_endpoint_promise() {
+            const endpoint_promise = op.execute_on_endpoint(op.params);
+            NOOP === endpoint_promise && NOOP === store_result
                 ? throw_noop_error(verb, op.name)
-                : datasource_promise instanceof Promise
-                    ? datasource_promise.then(process_datasource_result)
-                    : throw_datasource_return_error(op.datasource_verb)
+                : endpoint_promise instanceof Promise
+                    ? endpoint_promise.then(process_endpoint_result)
+                    : throw_endpoint_return_error(op.endpoint_verb)
                 ; // eslint-disable-line indent
-            return datasource_promise;
+            return endpoint_promise;
         }
 
-        function process_datasource_result(raw_result) {
+        function process_endpoint_result(raw_result) {
             store_result = op.execute_on_store(raw_result);
-            const result = NOOP === store_result
-                ? raw_result
-                : store_result
-                ;
+            const result = NOOP === store_result ? raw_result : store_result;
             return prepare_result(result);
         }
 
@@ -88,9 +85,9 @@
         throw_error(`${ verb }('${ op }') is a noop`);
     }
 
-    function throw_datasource_return_error(verb) {
+    function throw_endpoint_return_error(verb) {
         throw_error(
-            `datasource.${ verb }() must return a Promise or Collection.NOOP`,
+            `endpoint.${ verb }() must return a Promise or Collection.NOOP`,
             ); // eslint-disable-line indent
     }
 
