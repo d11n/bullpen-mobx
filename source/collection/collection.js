@@ -6,12 +6,8 @@
             return super(...args);
         }
     }
-    Object.assign(Collection.prototype, {
-        perform_operation,
-        }); // eslint-disable-line indent
-    Object.assign(Collection, {
-        Store,
-        }); // eslint-disable-line indent
+    Object.assign(Collection.prototype, { perform_operation });
+    Object.assign(Collection, { Store });
     return module.exports = Object.freeze(Collection);
 
     // -----------
