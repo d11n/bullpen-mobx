@@ -1,11 +1,12 @@
 // eslint-disable-next-line max-params
-(function main(BULLPEN, Collection, View) {
+(function main(BULLPEN, Collection, Statepen) {
     return module.exports = Object.freeze({
         ...BULLPEN,
-        ...{ Collection, View },
-        }); // eslint-disable-line indent
+        Collection,
+        Statepen,
+    });
 }(
     require('bullpen'),
     require('./collection'),
-    require('./view'),
+    require('./statepen'),
 ));

@@ -23,7 +23,7 @@
         "url": "https://github.com/d11n/bullpen-mobx/issues"
     },
     "dependencies": {
-        "bullpen": "0.0.19"
+        "bullpen": "0.0.20"
     },
     "peerDependencies": {
         "mobx": "3.x - 5.x"
@@ -35,7 +35,7 @@
         "babel-preset-stage-3": "^6.24.1",
         "chokidar-cli": "^1.2.0",
         "docco": "^0.8.0",
-        "eslint": "^4.19.1",
+        "eslint": "^5.3.0",
         "mkdirp": "^0.5.1",
         "mocha": "^5.2.0",
         "np": "^3.0.4",

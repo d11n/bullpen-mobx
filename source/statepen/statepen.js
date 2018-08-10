@@ -1,12 +1,12 @@
 // eslint-disable-next-line max-params
 (function main(BULLPEN, Store) {
-    class View extends BULLPEN.View {
+    class Statepen extends BULLPEN.Statepen {
         constructor(...args) {
             return super(...args);
         }
     }
-    Object.assign(View, { Store });
-    return module.exports = Object.freeze(View);
+    Object.assign(Statepen, { Store });
+    return module.exports = Object.freeze(Statepen);
 }(
     require('bullpen'),
     require('./store'),
