@@ -13,8 +13,8 @@
 
     // -----------
 
-    function initialize_struct({ initial_state }) {
-        return Object.seal(MOBX.observable({ ...initial_state }));
+    function initialize_struct({ state }) {
+        return MOBX.observable({ ...state });
     }
 
     function perform_key_mutation({ struct, op_name, op_params }) {
