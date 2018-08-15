@@ -17,8 +17,8 @@
         return MOBX.observable({ ...state });
     }
 
-    function perform_key_mutation({ struct, op_name, op_params }) {
-        MOBX.extendObservable(struct[op_name], op_params);
+    function perform_key_mutation({ struct, op }) {
+        MOBX.extendObservable(struct[op.name], op.params);
         return struct;
     }
 }(
