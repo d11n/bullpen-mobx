@@ -5,10 +5,10 @@
         Collection,
         Statepen,
         Treepen,
-    });
+    })
 }(
     require('bullpen'),
     require('./collection'),
     require('./statepen'),
     require('./treepen'),
-));
+))
