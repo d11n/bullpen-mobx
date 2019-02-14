@@ -39,13 +39,16 @@
     }
 
     function ensure_store_is_hydrated({ struct, data }) {
+        // Support MobX 3-5        4-5     3
+        const method = MOBX.set ? 'set' : 'extendObservable'
         if (data && Object.keys(data).length > 0) {
-            // Order matters a shit-ton here cuz mobx
             if (MOBX.set) {
-                // MOBX 4/5
-                MOBX.set(struct, 'is_hydrated', true)
-                MOBX.set(struct, 'is_pending', false)
-                MOBX.set(struct, 'tree', data)
+                // MOBX 4-5
+                MOBX.set(struct, {
+                    is_hydrated: true,
+                    is_pending: false,
+                    tree: data,
+                })
             } else {
                 // MOBX 3
                 const emptied_tree = {}
@@ -61,13 +64,7 @@
             Object.freeze(struct)
             // ^ Prevent marking as unhydrated or repending
         } else if (!struct.is_hydrated && !struct.is_pending) {
-            if (MOBX.set) {
-                // MOBX 4/5
-                MOBX.set(struct, 'is_pending', true)
-            } else {
-                // MOBX 3
-                MOBX.extendObservable(struct, { is_pending: true })
-            }
+            MOBX[method](struct, { is_pending: true })
         }
         return struct
     }
